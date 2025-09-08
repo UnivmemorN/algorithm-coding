@@ -1,0 +1,150 @@
+此题为三维偏序的纯模板题
+需要注意的点是模板的计算方法会遗漏掉部分完全一致的答案，因为此时对于一组完全相同的 i 和 j 我们只会记录 i < j 的那组解
+那么很好解决 我们只需要在CDQ分治之前提前将这种情况下的答案记录下来即可
+
+#include<algorithm>
+#include<bitset>
+#include<climits>
+#include<cmath>
+#include<cstdio>
+#include<cstdlib>
+#include<cstring>
+#include<iomanip>
+#include<iostream>
+#include<map>
+#include<queue>
+#include<set>
+#include<string>
+#include<unordered_map>
+#include<unordered_set>
+#include<vector>
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+typedef unsigned long long ull;
+constexpr int mod = 1e9 + 7;
+constexpr ll inf = 1e18;
+constexpr ld eps = 1e-8;
+constexpr int intinf = 1e9;
+
+#define lson(x) x << 1
+#define rson(x) x << 1 | 1
+
+ll gcd(ll x, ll y) {
+    return(y == 0 ? x : gcd(y, x % y));
+}
+
+ll ksm(ll a, ll b) {
+    if (b < 0) return 0;
+    ll res = 1;
+    while (b) {
+        if (b & 1) res = res * a;// % mod;
+        a = a * a;// % mod;
+        b >>= 1;
+    }
+    return res;
+}
+
+int lowbit(int x) {
+    return x & (-x);
+}
+
+constexpr int maxn = 2e5 + 10;
+constexpr int N = 20;
+constexpr int Base = 13;
+constexpr int dx[] = { 0,0,1,-1 };
+constexpr int dy[] = { 1,-1,0,0 };
+constexpr int primes[] = { 2,3,5,7,11,13,17,19,23,29,31,37,41,43 };
+//these primes' product > 1e16
+
+int n, k, tr[maxn], ans[maxn];
+
+struct node {
+    int a, b, c, id;
+} v[maxn];
+
+void add(int x,int y) {
+    for (int i = x; i <= k; i += lowbit(i))
+        tr[i] += y;
+}
+
+int query(int x) {
+    int res = 0;
+    for (int i = x; i >= 1; i -= lowbit(i))
+        res += tr[i];
+    return res;
+}
+
+bool cmp1(node c1, node c2) {
+    if (c1.a == c2.a) {
+        if (c1.b == c2.b) return c1.c < c2.c;
+        return c1.b < c2.b;
+    }
+    return c1.a < c2.a;
+}
+
+bool cmp2(node c1, node c2) {
+    return c1.b < c2.b;
+}
+
+void merge(int l, int r) {
+    int mid = (l + r) / 2;
+    int i = l;
+    vector<int> a;
+    for (int j = mid + 1; j <= r; j++) {
+        while (i <= mid && v[i].b <= v[j].b) {
+            add(v[i].c, 1);
+            a.push_back(v[i].c);
+            i++;
+        }
+        ans[v[j].id] += query(v[j].c);
+    }
+    for (auto v : a)
+        add(v, -1);
+    sort(v + l, v + r + 1, cmp2);
+}
+
+void CDQ(int l, int r) {
+    if (l == r) return;
+    int mid = (l + r) / 2;
+    CDQ(l, mid);
+    CDQ(mid + 1, r);
+    merge(l, r);
+    //for (int i = 1; i <= k; i++)
+    //    cout << tr[i] << " \n"[i == k];
+}
+
+void solve() {
+    cin >> n >> k;
+    for (int i = 1; i <= n; i++) {
+        cin >> v[i].a >> v[i].b >> v[i].c;
+        v[i].id = i;
+    }
+    sort(v + 1, v + n + 1, cmp1);
+    int r = 1;
+    for (int i = 1; i <= n; i++) {
+        while ((r + 1 <= n) && v[r + 1].a == v[i].a && v[r + 1].b == v[i].b && v[r + 1].c == v[i].c)
+            r++;
+        if (v[r].a == v[i].a && v[r].b == v[i].b && v[r].c == v[i].c)
+            ans[v[i].id] += r - i;
+    }
+    CDQ(1, n);
+    vector<int> f(n + 1);
+    for (int i = 1; i <= n; i++)
+        f[ans[i]]++;
+    for (int i = 0; i < n; i++)
+        cout << f[i] << "\n";
+}
+
+signed main() { 
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int T = 1;
+    //prework();
+    //cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
