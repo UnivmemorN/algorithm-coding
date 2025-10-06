@@ -49,6 +49,22 @@ constexpr int primes[] = { 2,3,5,7,11,13,17,19,23,29,31,37,41,43 };
 
 int n, m, a[1000][1000], cnt, ans[1000];
 
+int ksm(int a, int b) {
+    if (b < 0) return 0;
+    int res = 1;
+    while (b) {
+        if (b & 1) res = res * a % mod;
+        a = a * a % mod;
+        b >>= 1;
+    }
+    return res;
+}
+
+int inv(int x) {
+    return ksm(x, mod - 2);
+}
+
+
 void init(){
     cin >> n >> m;
     cnt = n * m;
