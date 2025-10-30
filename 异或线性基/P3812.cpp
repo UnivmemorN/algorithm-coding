@@ -43,25 +43,25 @@ void init() {
 
 bool insert(ll x) {
 	for (int i = 50; i >= 0; i--)
-		if ((x >> i) & 1) {
-			if (base[i] == 0) {
+		if ((x >> i) & 1) {//如果当前这位为 1 
+			if (base[i] == 0) {//如果当前位的线性基为空 就直接让 x 成为线性基
 				base[i] = x;
 				return true;
 			}
-			else x ^= base[i];
-			if (x == 0) return false;
+			else x ^= base[i];//否则利用性质 1 让 x 变为 x ^ base[i]
+			if (x == 0) return false;//如果若干次异或之后 x 变为了 0 则表明它是冗余的 无法插入线性基
 		}
 }
 
 void solve() {
 	bool zero = false;
 	for (int i = 1; i <= n; i++) {
-		if (!insert(a[i])) 
+		if (!insert(a[i])) //尝试插入元素 a[i] 如果插入失败 则表明能生成 0
 			zero = true;
 	}
 	ll ans = 0;
 	for (int i = 50; i >= 0; i--)
-		ans = max(ans, ans ^ base[i]);
+		ans = max(ans, ans ^ base[i]);//贪心 对于每一位上的基 如果异或之后能让答案变得更大就异或
 	cout << ans << "\n";
 }
 
